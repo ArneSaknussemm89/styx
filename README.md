@@ -3,7 +3,7 @@
 A simple, yet robust Entity Component System. Based around the GetX package for reactivity,
 replacing the "S" in ECS.
 
-[![pub package](https://img.shields.io/pub/v/get.svg?label=styx&color=blue)](https://pub.dev/packages/styx)
+[![pub package](https://img.shields.io/pub/v/styx.svg?label=styx&color=blue)](https://pub.dev/packages/styx)
 
 # Installing
 
