@@ -22,6 +22,6 @@ import 'package:styx/styx.dart';
 
 # Documentation
 **TODO**
-[] Create documentation with code examples.
-[] Create sample apps for real world scenarios.
-[] Actually have a docs site :upside_down_face:
+- [] Create documentation with code examples.
+- [] Create sample apps for real world scenarios.
+- [] Actually have a docs site :upside_down_face:
