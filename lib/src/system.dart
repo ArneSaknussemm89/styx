@@ -15,7 +15,7 @@ typedef ComponentSerializerFunction = Map<String, dynamic> Function(Serializable
 typedef EntityToJsonFunction = Map<String, dynamic> Function(Entity entity);
 
 // A function that takes in JSON and returns an Entity;
-typedef EntityFromJsonFunction = Entity? Function(Map<String, dynamic> json, EntitySystem system);
+typedef EntityFromJsonFunction = Entity Function(Map<String, dynamic> json, EntitySystem system);
 
 /// This system is for keeping track of all created entities.
 class EntitySystem {
@@ -95,7 +95,7 @@ class EntitySystem {
 
   /// Deserializing entities from JSON.
   Entity createFromJson(Map<String, dynamic> json) {
-    final entity = Entity.fromJson(json, this);
+    final entity = entityFromJsonFunction(json, this);
     _entities[entity.guid] = entity.obs;
     return entity;
   }
@@ -137,7 +137,7 @@ Map<String, dynamic> defaultEntityToJsonFunction(Entity entity) {
   };
 }
 
-Entity? defaultEntityFromJsonFunction(Map<String, dynamic> json, EntitySystem system) {
+Entity defaultEntityFromJsonFunction(Map<String, dynamic> json, EntitySystem system) {
   var e = Entity(json['guid'], system);
   if (json['components'] != null) {
     final comps = json['components'] as List<dynamic>;
