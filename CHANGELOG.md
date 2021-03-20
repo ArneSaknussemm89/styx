@@ -1,4 +1,8 @@
-## [1.0.0-nullsafety.4]  19/03/2021
+## [1.0.0-nullsafety.5] - 19/03/2021
+
+Fixing pub.dev warnings and gradings.
+
+## [1.0.0-nullsafety.4] - 19/03/2021
 
 Fixed an issue with a circular call between `Entity` and `EntitySystem` that was causing a
 StackOverflow error.

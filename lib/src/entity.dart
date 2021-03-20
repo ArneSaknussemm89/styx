@@ -13,7 +13,8 @@ extension RxImplEntity on Rx<Entity> {
 
   /// Adds component to the entity.
   Entity operator +(Component component) {
-    assert(value!.isDestroyed.isFalse, 'Tried adding component to destroyed entity: ${toJson()}');
+    assert(value!.isDestroyed.isFalse,
+        'Tried adding component to destroyed entity: ${toJson()}');
     value!.components[component.runtimeType] = component..ref = value!;
     return value!;
   }
@@ -25,7 +26,8 @@ extension RxImplEntity on Rx<Entity> {
 
   /// Removes component from the entity.
   Entity operator -(Type t) {
-    assert(value!.isDestroyed.isFalse, 'Tried removing component from destroyed entity: ${toJson()}');
+    assert(value!.isDestroyed.isFalse,
+        'Tried removing component from destroyed entity: ${toJson()}');
     var component = value!.components[t];
     if (component != null) {
       value!.components.remove(t);
@@ -69,7 +71,8 @@ class Entity with EquatableMixin {
 
   /// Adds component to the entity.
   Entity operator +(Component component) {
-    assert(isDestroyed.isFalse, 'Tried adding component to destroyed entity: ${toJson()}');
+    assert(isDestroyed.isFalse,
+        'Tried adding component to destroyed entity: ${toJson()}');
     components[component.runtimeType] = component..ref = this;
     return this;
   }
@@ -81,7 +84,8 @@ class Entity with EquatableMixin {
 
   /// Removes component from the entity.
   Entity operator -(Type t) {
-    assert(isDestroyed.isFalse, 'Tried removing component from destroyed entity: ${toJson()}');
+    assert(isDestroyed.isFalse,
+        'Tried removing component from destroyed entity: ${toJson()}');
     var component = components[t];
     if (component != null) {
       components.remove(t);

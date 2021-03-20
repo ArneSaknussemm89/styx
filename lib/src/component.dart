@@ -10,5 +10,6 @@ abstract class Component {
     return ref.get<T>();
   }
 
-  factory Component.fromJson(Map<String, dynamic> json) => throw UnimplementedError();
+  factory Component.fromJson(Map<String, dynamic> json) =>
+      throw UnimplementedError();
 }
