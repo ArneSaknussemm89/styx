@@ -1,6 +1,6 @@
 name: styx
 description: A new Flutter package project.
-version: 1.0.0-nullsafety.2
+version: 1.0.0-nullsafety.3
 repository: https://github.com/ArneSaknussemm89/styx
 
 environment:
