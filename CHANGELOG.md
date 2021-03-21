@@ -1,3 +1,7 @@
+## [1.0.0-nullsafety.6] - 19/03/2021
+
+Fixing an issue where the entityToJsonFunction was not being used.
+
 ## [1.0.0-nullsafety.5] - 19/03/2021
 
 Fixing pub.dev warnings and gradings.

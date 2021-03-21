@@ -6,16 +6,19 @@ import './component.dart';
 import './entity.dart';
 
 // A function that takes JSON data and returns a component.
-typedef ComponentDeserializerFunction = Component? Function(Map<String, dynamic> data);
+typedef ComponentDeserializerFunction = Component? Function(
+    Map<String, dynamic> data);
 
 // A function that takes a component and returns JSON-esque data.
-typedef ComponentSerializerFunction = Map<String, dynamic> Function(SerializableComponent component);
+typedef ComponentSerializerFunction = Map<String, dynamic> Function(
+    SerializableComponent component);
 
 // A function that takes in an entity and returns JSON-esque data.
 typedef EntityToJsonFunction = Map<String, dynamic> Function(Entity entity);
 
 // A function that takes in JSON and returns an Entity;
-typedef EntityFromJsonFunction = Entity Function(Map<String, dynamic> json, EntitySystem system);
+typedef EntityFromJsonFunction = Entity Function(
+    Map<String, dynamic> json, EntitySystem system);
 
 /// This system is for keeping track of all created entities.
 class EntitySystem {
@@ -102,17 +105,7 @@ class EntitySystem {
 
   /// Standard serializer that turns an entity into JSON.
   Map<String, dynamic> entityToJson(Entity entity) {
-    List<Map<String, dynamic>> componentData = [];
-    entity.components().forEach(
-      (type, component) {
-        if (component is SerializableComponent) {
-          componentData.add({'type': type.toString(), 'data': (component as SerializableComponent).toJson()});
-        }
-      },
-    );
-    return <String, dynamic>{
-      'components': componentData,
-    };
+    return entityToJsonFunction(entity);
   }
 
   /// When an entity has been destroyed, we remove it from the list
@@ -128,7 +121,10 @@ Map<String, dynamic> defaultEntityToJsonFunction(Entity entity) {
   entity.components().forEach(
     (type, component) {
       if (component is SerializableComponent) {
-        componentData.add({'type': type.toString(), 'data': (component as SerializableComponent).toJson()});
+        componentData.add({
+          'type': type.toString(),
+          'data': (component as SerializableComponent).toJson()
+        });
       }
     },
   );
@@ -137,7 +133,8 @@ Map<String, dynamic> defaultEntityToJsonFunction(Entity entity) {
   };
 }
 
-Entity defaultEntityFromJsonFunction(Map<String, dynamic> json, EntitySystem system) {
+Entity defaultEntityFromJsonFunction(
+    Map<String, dynamic> json, EntitySystem system) {
   var e = Entity(json['guid'], system);
   if (json['components'] != null) {
     final comps = json['components'] as List<dynamic>;
