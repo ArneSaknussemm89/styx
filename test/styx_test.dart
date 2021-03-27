@@ -3,35 +3,13 @@ import 'package:get/get.dart';
 
 import 'package:styx/styx.dart';
 
-class CountComponent extends Component {
-  CountComponent(int count) {
-    this.count(count);
-  }
-
-  final count = RxInt(0);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      "count": count(),
-    };
-  }
-}
+import 'data/data.dart';
 
 void main() {
-  late EntitySystem system;
-
-  setUp(() {
-    system = EntitySystem();
-  });
-
   group('Adding Components', () {
-    /// Clean entities between tests.
-    tearDown(() {
-      system.flush();
-    });
-
     test('can add component', () {
+      final system = EntitySystem();
+
       expect(system.entities.length, 0);
       var entity = system.create();
       entity += CountComponent(0);
@@ -39,6 +17,8 @@ void main() {
     });
 
     test('cannot have same component twice', () {
+      final system = EntitySystem();
+
       expect(system.entities.length, 0);
       var entity = system.create();
       entity += CountComponent(0);
@@ -48,25 +28,35 @@ void main() {
     });
   });
 
-  group('Reactivity', () {
-    /// Clean entities between tests.
-    Worker? watcher;
+  group('Comparisons', () {
+    test('find component differences', () {
+      final system = EntitySystem();
 
-    tearDown(() {
-      system.flush();
-      watcher?.dispose();
+      var e1 = system.create();
+      e1 += CountComponent(1);
+
+      var e2 = system.create();
+      e2 += NameComponent('Entity 2');
+
+      final diff = e1.componentDiff(e2);
+      expect(diff, Set.from([CountComponent]));
     });
+  });
 
+  group('Reactivity', () {
     test('detect new entities', () {
+      final system = EntitySystem();
+
       List<String> guids = [];
-      watcher = ever(system.entities, (List<Rx<Entity>> entities) {
-        guids = entities.map((e) => e()!.guid).toList();
+      Worker watcher = ever(system.entities, (List<Rx<Entity>> entities) {
+        guids = entities.map((e) => e().guid).toList();
       });
 
       var e = system.create();
       var e2 = system.create();
 
       expect(guids.length, 2);
+      watcher.dispose();
     });
   });
 }

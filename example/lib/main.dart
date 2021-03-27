@@ -24,7 +24,8 @@ class Entry extends StatelessWidget {
 class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final counter = system.entities.where((e) => e.has<Counter>()).toList().first;
+    final counter =
+        system.entities.where((e) => e.has<Counter>()).toList().first;
     final person = system.entities.where((e) => e.has<Name>()).toList().first;
     return Scaffold(
       appBar: AppBar(title: Text('Counter Example')),
@@ -41,7 +42,8 @@ class Home extends StatelessWidget {
           }),
           Obx(() {
             return Center(
-              child: Text(person.get<Name>().value() ?? '', style: TextStyle(fontSize: 24)),
+              child: Text(person.get<Name>().value(),
+                  style: TextStyle(fontSize: 24)),
             );
           }).paddingOnly(top: 20),
           TextFormField(

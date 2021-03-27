@@ -7,14 +7,60 @@ import './system.dart';
 extension RxImplEntity on Rx<Entity> {
   /// Returns a matching component from type T.
   T get<T extends Component>() {
-    var component = value!.components[T];
+    var component = value.components[T];
     return component as T;
   }
 
   /// Adds component to the entity.
   Entity operator +(Component component) {
-    assert(value!.isDestroyed.isFalse,
+    assert(value.isDestroyed.isFalse,
         'Tried adding component to destroyed entity: ${toJson()}');
+    value.components[component.runtimeType] = component..ref = value;
+    return value;
+  }
+
+  /// For cascade
+  void set(Component component) {
+    var _ = this + component;
+  }
+
+  /// Removes component from the entity.
+  Entity operator -(Type t) {
+    assert(value.isDestroyed.isFalse,
+        'Tried removing component from destroyed entity: ${toJson()}');
+    var component = value.components[t];
+    if (component != null) {
+      value.components.remove(t);
+    }
+
+    return value;
+  }
+
+  /// For cascade
+  void remove<T extends Component>() {
+    var _ = this - T;
+  }
+
+  /// If entity has a component of type T
+  bool has<T extends Component>() {
+    return value.components.containsKey(T);
+  }
+}
+
+extension RxnImplEntity on Rxn<Entity> {
+  /// Returns a matching component from type T.
+  T? get<T extends Component>() {
+    var component = value?.components[T];
+    return component as T;
+  }
+
+  /// Adds component to the entity.
+  Entity? operator +(Component component) {
+    if (value == null) return null;
+    assert(
+      value!.isDestroyed.isFalse,
+      'Tried adding component to destroyed entity: ${toJson()}',
+    );
     value!.components[component.runtimeType] = component..ref = value!;
     return value!;
   }
@@ -25,15 +71,18 @@ extension RxImplEntity on Rx<Entity> {
   }
 
   /// Removes component from the entity.
-  Entity operator -(Type t) {
-    assert(value!.isDestroyed.isFalse,
-        'Tried removing component from destroyed entity: ${toJson()}');
+  Entity? operator -(Type t) {
+    if (value == null) return null;
+    assert(
+      value!.isDestroyed.isFalse,
+      'Tried removing component from destroyed entity: ${toJson()}',
+    );
     var component = value!.components[t];
     if (component != null) {
       value!.components.remove(t);
     }
 
-    return value!;
+    return value;
   }
 
   /// For cascade
@@ -42,7 +91,8 @@ extension RxImplEntity on Rx<Entity> {
   }
 
   /// If entity has a component of type T
-  bool has<T extends Component>() {
+  bool? has<T extends Component>() {
+    if (value == null) return null;
     return value!.components.containsKey(T);
   }
 }
@@ -114,6 +164,17 @@ class Entity with EquatableMixin {
     }
     system.destroyed(this);
     isDestroyed.value = true;
+  }
+
+  /// Compares the component list between entities and returns a list of
+  /// types of components that "a" has that "b" does not.
+  ///
+  /// E.g.
+  ///
+  /// final compared = a.componentDiff(b);
+  Set<Type> componentDiff(Entity e) {
+    final ecomps = e.components.keys.toSet();
+    return components.keys.toSet().difference(ecomps);
   }
 
   Map<String, dynamic> toJson() {

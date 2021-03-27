@@ -1,6 +1,6 @@
 name: styx
 description: An implementation of the ECS paradigm with an emphasis on simplicity.
-version: 1.0.0-nullsafety.6
+version: 1.0.0
 repository: https://github.com/ArneSaknussemm89/styx
 
 environment:
@@ -11,7 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   equatable: '^2.0.0'
-  get: '>=4.0.0-nullsafety <5.0.0'
+  get: '^4.1.0'
   uuid: '>=3.0.0 <4.0.0'
 
 dev_dependencies:

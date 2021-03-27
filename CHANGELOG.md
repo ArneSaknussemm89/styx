@@ -1,3 +1,9 @@
+## [1.1.0] - 27/03/2021
+
+Full release! Matched to Get ^4.1.0
+Additions:
+- Added a new method for getting component differences between two entities.
+
 ## [1.0.0-nullsafety.6] - 19/03/2021
 
 Fixing an issue where the entityToJsonFunction was not being used.

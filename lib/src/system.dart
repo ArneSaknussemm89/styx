@@ -18,7 +18,9 @@ typedef EntityToJsonFunction = Map<String, dynamic> Function(Entity entity);
 
 // A function that takes in JSON and returns an Entity;
 typedef EntityFromJsonFunction = Entity Function(
-    Map<String, dynamic> json, EntitySystem system);
+  Map<String, dynamic> json,
+  EntitySystem system,
+);
 
 /// This system is for keeping track of all created entities.
 class EntitySystem {
@@ -41,7 +43,7 @@ class EntitySystem {
 
   /// Remove all entities.
   void flush() {
-    _entities.forEach((key, value) => value()!.destroy());
+    _entities.forEach((key, value) => value().destroy());
     _entities.clear();
   }
 
