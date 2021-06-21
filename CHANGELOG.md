@@ -1,3 +1,11 @@
+## [1.2.0] - 21/06/2021
+
+Additions:
+- Added a new EntityMatcher class that can be used to describe a way of
+matching entities. Can be used on it's own to create your own grouping of entities
+and will be used in the Flutter specific package for Styx.
+- Added a new method `hasComponent` for when the Type is not explicity known.
+
 ## [1.1.0] - 27/03/2021
 
 Full release! Matched to Get ^4.1.0
