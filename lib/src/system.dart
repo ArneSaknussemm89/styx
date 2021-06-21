@@ -66,10 +66,10 @@ class EntitySystem {
   /// The refresh worker.
   late Worker _refreshWorker;
 
-  /// An observable list of all entities.
+  /// The internal registry of all created entities.
   final _entities = Map<String, Rx<Entity>>().obs;
 
-  /// An observable, unmodifiable list of them.
+  /// An observable list of entities.
   final entities = <Rx<Entity>>[].obs;
 
   /// Register a deserializer function.

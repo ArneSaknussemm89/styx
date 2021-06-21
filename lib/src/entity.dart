@@ -45,6 +45,10 @@ extension RxImplEntity on Rx<Entity> {
   bool has<T extends Component>() {
     return value.components.containsKey(T);
   }
+
+  bool hasComponent(Type type) {
+    return value.components.containsKey(type);
+  }
 }
 
 extension RxnImplEntity on Rxn<Entity> {
@@ -107,7 +111,7 @@ class Entity with EquatableMixin {
   final EntitySystem system;
 
   // Holding all components map through their type.
-  RxMap<Type, Component> components = <Type, Component>{}.obs;
+  final components = <Type, Component>{}.obs;
 
   /// Used internally for verifying Entity has not been destroyed before
   /// mutating any values.
@@ -187,4 +191,93 @@ class Entity with EquatableMixin {
 
   @override
   List<Object> get props => [components];
+}
+
+/// A class that describe a way to filter entities.
+///
+/// There are 3 properties, each with it's own functionality.
+/// all: The entity MUST contain all of these components.
+/// any: The entity MUST contain at *least* one of these components.
+/// inverse: Flips the logic, so MUST becomes MUST NOT.
+///
+/// var matcher = EntityMatcher(all: [CountComponent, PriceComponent])
+/// This matcher would match any entity that has both the CountComponent AND the
+/// Price Component.
+///
+/// var matcher = EntityMatcher(all: [CartComponent], any: [PriceComponent, CouponComponent])
+/// This matcher would match any entity that has the CartComponent, and has at least one between
+/// the PriceComponent and CouponComponent.
+///
+/// var matcher = EntityMatcher(all: [DiscontinuedComponent, PriceComponent], reverse: true)
+/// This matcher would match any entity that DOES NOT have the DiscontinuedComponent and PriceComponent.
+///
+/// var matcher = EntityMatcher(any: [DiscontinuedComponent, OutOfStockComponent, DisabledComponent], reverse: true)
+/// This matcher would match any entity that DOES NOT have any one of these components.
+class EntityMatcher extends Equatable {
+  EntityMatcher({Set<Type>? all, Set<Type>? any, this.reverse = false})
+      : all = all ?? Set.of([]),
+        any = any ?? Set.of([]);
+
+  final Set<Type> all;
+  final Set<Type> any;
+  final bool reverse;
+
+  bool contains(Type type) {
+    return all.contains(type) || any.contains(type);
+  }
+
+  bool matches(Rx<Entity> entity) {
+    if (any.isEmpty && all.isEmpty) {
+      return true;
+    }
+
+    final anyMatched = matchesAny(entity);
+    final allMatched = matchesAll(entity);
+
+    return anyMatched && allMatched;
+  }
+
+  bool matchesAll(Rx<Entity> entity) {
+    if (all.isEmpty) return true;
+    // If reverse, we want to make sure we contain NONE of the components
+    // in all.
+    if (reverse) {
+      for (var t in all) {
+        if (entity.hasComponent(t)) {
+          return false;
+        }
+      }
+    }
+
+    for (var t in all) {
+      if (entity.hasComponent(t) == false) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  bool matchesAny(Rx<Entity> entity) {
+    if (any.isEmpty) return true;
+    // If reversed, we match if it doesn't contain any of the any components
+    if (reverse) {
+      for (var t in any) {
+        if (entity.hasComponent(t) == false) {
+          return true;
+        }
+      }
+    }
+
+    for (var t in any) {
+      if (entity.hasComponent(t)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  @override
+  List<Object?> get props => [all, any, reverse];
 }
