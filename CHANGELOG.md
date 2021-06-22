@@ -1,3 +1,10 @@
+## [1.2.1] - 22/06/2021
+
+Fixes:
+- `guid` was missing from Entity `props`, which could cause two different entities
+with matching components and values to match even though they have different
+guids.
+
 ## [1.2.0] - 21/06/2021
 
 Additions:

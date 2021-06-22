@@ -190,7 +190,7 @@ class Entity with EquatableMixin {
   }
 
   @override
-  List<Object> get props => [components];
+  List<Object> get props => [guid, components];
 }
 
 /// A class that describe a way to filter entities.

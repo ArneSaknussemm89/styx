@@ -1,6 +1,6 @@
 name: styx
 description: An implementation of the ECS paradigm with an emphasis on simplicity.
-version: 1.2.0
+version: 1.2.1
 repository: https://github.com/ArneSaknussemm89/styx
 
 environment:
