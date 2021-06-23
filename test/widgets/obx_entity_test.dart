@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:styx/src/system.dart';
+import 'package:styx/styx.dart';
 
 import '../data/data.dart';
 

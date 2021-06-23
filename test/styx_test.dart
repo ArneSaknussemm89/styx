@@ -64,18 +64,18 @@ void main() {
       final itemMatcher =
           EntityMatcher(all: Set.of([PriceComponent, CatalogItemComponent]));
 
-      var e1 = system.create().obs;
-      var e2 = system.create().obs;
-      var e3 = system.create().obs;
+      var e1 = system.create();
+      var e2 = system.create();
+      var e3 = system.create();
 
-      e1.value += CatalogItemComponent();
-      e1.value += PriceComponent(2.00);
+      e1 += CatalogItemComponent();
+      e1 += PriceComponent(2.00);
 
-      e2.value += CatalogItemComponent();
-      e2.value += PriceComponent(5.00);
+      e2 += CatalogItemComponent();
+      e2 += PriceComponent(5.00);
 
-      e3.value += PriceComponent(10.00);
-      e3.value += CartComponent();
+      e3 += PriceComponent(10.00);
+      e3 += CartComponent();
 
       // Entity should match to itemMatcher but NOT to cartMatcher
       expect(cartMatcher.matches(e1), false);
@@ -94,16 +94,16 @@ void main() {
       final itemMatcher =
           EntityMatcher(any: Set.of([PriceComponent, CatalogItemComponent]));
 
-      var e1 = system.create().obs;
-      var e2 = system.create().obs;
-      var e3 = system.create().obs;
+      var e1 = system.create();
+      var e2 = system.create();
+      var e3 = system.create();
 
-      e1.value += CatalogItemComponent();
+      e1 += CatalogItemComponent();
 
-      e2.value += PriceComponent(5.00);
+      e2 += PriceComponent(5.00);
 
-      e3.value += CountComponent(1);
-      e3.value += NameComponent('Test');
+      e3 += CountComponent(1);
+      e3 += NameComponent('Test');
 
       expect(itemMatcher.matches(e1), true);
       expect(itemMatcher.matches(e2), true);
@@ -116,16 +116,16 @@ void main() {
       final itemMatcher = EntityMatcher(
           any: Set.of([PriceComponent, CatalogItemComponent]), reverse: true);
 
-      var e1 = system.create().obs;
-      var e2 = system.create().obs;
-      var e3 = system.create().obs;
+      var e1 = system.create();
+      var e2 = system.create();
+      var e3 = system.create();
 
-      e1.value += CatalogItemComponent();
+      e1 += CatalogItemComponent();
 
-      e2.value += PriceComponent(5.00);
+      e2 += PriceComponent(5.00);
 
-      e3.value += PriceComponent(1.00);
-      e3.value += CatalogItemComponent();
+      e3 += PriceComponent(1.00);
+      e3 += CatalogItemComponent();
 
       expect(itemMatcher.matches(e1), true);
       expect(itemMatcher.matches(e2), true);
@@ -138,15 +138,15 @@ void main() {
       final itemMatcher = EntityMatcher(
           all: Set.of([PriceComponent, CatalogItemComponent]), reverse: true);
 
-      var e1 = system.create().obs;
-      var e2 = system.create().obs;
-      var e3 = system.create().obs;
+      var e1 = system.create();
+      var e2 = system.create();
+      var e3 = system.create();
 
-      e1.value += CatalogItemComponent();
+      e1 += CatalogItemComponent();
 
-      e2.value += PriceComponent(5.00);
+      e2 += PriceComponent(5.00);
 
-      e3.value += NameComponent('Test');
+      e3 += NameComponent('Test');
 
       expect(itemMatcher.matches(e1), false);
       expect(itemMatcher.matches(e2), false);

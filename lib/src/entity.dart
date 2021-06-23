@@ -5,6 +5,8 @@ import 'component.dart';
 import 'system.dart';
 
 extension RxImplEntity on Rx<Entity> {
+  RxMap<Type, Component> get components => value.components;
+
   /// Returns a matching component from type T.
   T get<T extends Component>() {
     var component = value.components[T];
@@ -12,13 +14,13 @@ extension RxImplEntity on Rx<Entity> {
   }
 
   /// Adds component to the entity.
-  Entity operator +(Component component) {
+  Rx<Entity> operator +(Component component) {
     assert(value.isDestroyed.isFalse,
         'Tried adding component to destroyed entity: ${toJson()}');
     update((val) {
       val!.components[component.runtimeType] = component..ref = val;
     });
-    return value;
+    return this;
   }
 
   /// For cascade
@@ -27,7 +29,7 @@ extension RxImplEntity on Rx<Entity> {
   }
 
   /// Removes component from the entity.
-  Entity operator -(Type t) {
+  Rx<Entity> operator -(Type t) {
     assert(value.isDestroyed.isFalse,
         'Tried removing component from destroyed entity: ${toJson()}');
     var component = value.components[t];
@@ -37,7 +39,7 @@ extension RxImplEntity on Rx<Entity> {
       });
     }
 
-    return value;
+    return this;
   }
 
   /// For cascade
@@ -53,9 +55,22 @@ extension RxImplEntity on Rx<Entity> {
   bool hasComponent(Type type) {
     return value.components.containsKey(type);
   }
+
+  /// Compares the component list between entities and returns a list of
+  /// types of components that "a" has that "b" does not.
+  ///
+  /// E.g.
+  ///
+  /// final compared = a.componentDiff(b);
+  Set<Type> componentDiff(Rx<Entity> e) {
+    return value.componentDiff(e);
+  }
 }
 
 extension RxnImplEntity on Rxn<Entity> {
+  RxMap<Type, Component>? get components =>
+      value != null ? value!.components : null;
+
   /// Returns a matching component from type T.
   T? get<T extends Component>() {
     var component = value?.components[T];
@@ -102,6 +117,17 @@ extension RxnImplEntity on Rxn<Entity> {
   bool? has<T extends Component>() {
     if (value == null) return null;
     return value!.components.containsKey(T);
+  }
+
+  /// Compares the component list between entities and returns a list of
+  /// types of components that "a" has that "b" does not.
+  ///
+  /// E.g.
+  ///
+  /// final compared = a.componentDiff(b);
+  Set<Type>? componentDiff(Rx<Entity> e) {
+    if (value == null) return null;
+    return value!.componentDiff(e);
   }
 }
 
@@ -180,7 +206,7 @@ class Entity with EquatableMixin {
   /// E.g.
   ///
   /// final compared = a.componentDiff(b);
-  Set<Type> componentDiff(Entity e) {
+  Set<Type> componentDiff(Rx<Entity> e) {
     final ecomps = e.components.keys.toSet();
     return components.keys.toSet().difference(ecomps);
   }
@@ -189,7 +215,7 @@ class Entity with EquatableMixin {
     return system.entityToJson(this);
   }
 
-  factory Entity.fromJson(Map<String, dynamic> json, EntitySystem system) {
+  static Rx<Entity> fromJson(Map<String, dynamic> json, EntitySystem system) {
     return system.createFromJson(json);
   }
 

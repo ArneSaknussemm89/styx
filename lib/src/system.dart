@@ -92,17 +92,17 @@ class EntitySystem {
   }
 
   /// The way a new entity should be created.
-  Entity create() {
+  Rx<Entity> create() {
     final entity = Entity(uuid.v4(), this);
     _entities[entity.guid] = entity.obs;
-    return entity;
+    return _entities[entity.guid]!;
   }
 
   /// Deserializing entities from JSON.
-  Entity createFromJson(Map<String, dynamic> json) {
+  Rx<Entity> createFromJson(Map<String, dynamic> json) {
     final entity = entityFromJsonFunction(json, this);
     _entities[entity.guid] = entity.obs;
-    return entity;
+    return _entities[entity.guid]!;
   }
 
   /// Standard serializer that turns an entity into JSON.
