@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:get/get.dart';
 
-import './component.dart';
-import './system.dart';
+import 'component.dart';
+import 'system.dart';
 
 extension RxImplEntity on Rx<Entity> {
   /// Returns a matching component from type T.
@@ -15,7 +15,9 @@ extension RxImplEntity on Rx<Entity> {
   Entity operator +(Component component) {
     assert(value.isDestroyed.isFalse,
         'Tried adding component to destroyed entity: ${toJson()}');
-    value.components[component.runtimeType] = component..ref = value;
+    update((val) {
+      val!.components[component.runtimeType] = component..ref = val;
+    });
     return value;
   }
 
@@ -30,7 +32,9 @@ extension RxImplEntity on Rx<Entity> {
         'Tried removing component from destroyed entity: ${toJson()}');
     var component = value.components[t];
     if (component != null) {
-      value.components.remove(t);
+      update((val) {
+        val!.components.remove(t);
+      });
     }
 
     return value;
@@ -247,11 +251,11 @@ class EntityMatcher extends Equatable {
           return false;
         }
       }
-    }
-
-    for (var t in all) {
-      if (entity.hasComponent(t) == false) {
-        return false;
+    } else {
+      for (var t in all) {
+        if (entity.hasComponent(t) == false) {
+          return false;
+        }
       }
     }
 
@@ -267,11 +271,11 @@ class EntityMatcher extends Equatable {
           return true;
         }
       }
-    }
-
-    for (var t in any) {
-      if (entity.hasComponent(t)) {
-        return true;
+    } else {
+      for (var t in any) {
+        if (entity.hasComponent(t)) {
+          return true;
+        }
       }
     }
 

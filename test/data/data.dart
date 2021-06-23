@@ -30,3 +30,19 @@ class NameComponent extends Component with SerializableComponent {
     };
   }
 }
+
+class CartComponent extends Component {
+  CartComponent();
+}
+
+class CatalogItemComponent extends Component {
+  CatalogItemComponent();
+}
+
+class PriceComponent extends Component {
+  PriceComponent(double price) {
+    this.price(price);
+  }
+
+  final price = 0.00.obs;
+}

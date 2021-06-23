@@ -41,6 +41,117 @@ void main() {
       final diff = e1.componentDiff(e2);
       expect(diff, Set.from([CountComponent]));
     });
+
+    test('different entities with same values', () {
+      final system = EntitySystem();
+
+      var e1 = system.create();
+      e1 += CountComponent(1);
+
+      var e2 = system.create();
+      e2 += CountComponent(1);
+
+      expect(e1 == e2, false);
+    });
+  });
+
+  group('Matchers', () {
+    test('matching all', () {
+      final system = EntitySystem();
+
+      final cartMatcher =
+          EntityMatcher(all: Set.of([CartComponent, PriceComponent]));
+      final itemMatcher =
+          EntityMatcher(all: Set.of([PriceComponent, CatalogItemComponent]));
+
+      var e1 = system.create().obs;
+      var e2 = system.create().obs;
+      var e3 = system.create().obs;
+
+      e1.value += CatalogItemComponent();
+      e1.value += PriceComponent(2.00);
+
+      e2.value += CatalogItemComponent();
+      e2.value += PriceComponent(5.00);
+
+      e3.value += PriceComponent(10.00);
+      e3.value += CartComponent();
+
+      // Entity should match to itemMatcher but NOT to cartMatcher
+      expect(cartMatcher.matches(e1), false);
+      expect(itemMatcher.matches(e1), true);
+
+      expect(cartMatcher.matches(e2), false);
+      expect(itemMatcher.matches(e2), true);
+
+      expect(cartMatcher.matches(e3), true);
+      expect(itemMatcher.matches(e3), false);
+    });
+
+    test('testing any', () {
+      final system = EntitySystem();
+
+      final itemMatcher =
+          EntityMatcher(any: Set.of([PriceComponent, CatalogItemComponent]));
+
+      var e1 = system.create().obs;
+      var e2 = system.create().obs;
+      var e3 = system.create().obs;
+
+      e1.value += CatalogItemComponent();
+
+      e2.value += PriceComponent(5.00);
+
+      e3.value += CountComponent(1);
+      e3.value += NameComponent('Test');
+
+      expect(itemMatcher.matches(e1), true);
+      expect(itemMatcher.matches(e2), true);
+      expect(itemMatcher.matches(e3), false);
+    });
+
+    test('testing any inverse', () {
+      final system = EntitySystem();
+
+      final itemMatcher = EntityMatcher(
+          any: Set.of([PriceComponent, CatalogItemComponent]), reverse: true);
+
+      var e1 = system.create().obs;
+      var e2 = system.create().obs;
+      var e3 = system.create().obs;
+
+      e1.value += CatalogItemComponent();
+
+      e2.value += PriceComponent(5.00);
+
+      e3.value += PriceComponent(1.00);
+      e3.value += CatalogItemComponent();
+
+      expect(itemMatcher.matches(e1), true);
+      expect(itemMatcher.matches(e2), true);
+      expect(itemMatcher.matches(e3), false);
+    });
+
+    test('testing all inverse', () {
+      final system = EntitySystem();
+
+      final itemMatcher = EntityMatcher(
+          all: Set.of([PriceComponent, CatalogItemComponent]), reverse: true);
+
+      var e1 = system.create().obs;
+      var e2 = system.create().obs;
+      var e3 = system.create().obs;
+
+      e1.value += CatalogItemComponent();
+
+      e2.value += PriceComponent(5.00);
+
+      e3.value += NameComponent('Test');
+
+      expect(itemMatcher.matches(e1), false);
+      expect(itemMatcher.matches(e2), false);
+      expect(itemMatcher.matches(e3), true);
+    });
   });
 
   group('Reactivity', () {
