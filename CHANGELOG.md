@@ -1,3 +1,12 @@
+## [1.3.0] - 23/06/2021
+
+BREAKING CHANGES:
+- EntitySystem and EntityMatcher updated to expect `Rx<Entity>` instead of `Entity` directly
+as the `Rx<T>` functionality was expected in various places.
+
+This will be changed in 2.0.0 as Entity itself will implement Rx directly and won't
+need to be wrapped with `Rx<T>`.
+
 ## [1.2.1] - 22/06/2021
 
 Fixes:
