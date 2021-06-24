@@ -88,7 +88,8 @@ class EntitySystem {
 
   /// Refreshing the observable list of entities.
   void refreshEntities(Map<String, Rx<Entity>> ents) {
-    entities.assignAll(ents.values);
+    final list = ents.values.toList(growable: false);
+    entities.value = list;
   }
 
   /// The way a new entity should be created.
