@@ -1,4 +1,10 @@
-## [1.3.1] - 32/06/2021
+## [1.3.2] - 24/06/2021
+
+Fixed:
+- A bug where listening to the entity list would send two events, one with an empty
+list and one with the actual changed list. This was causing strange behavior for listeners.
+
+## [1.3.1] - 23/06/2021
 
 Fixed:
 - Extensions were not being exported and could not be used.
