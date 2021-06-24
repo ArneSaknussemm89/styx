@@ -1,3 +1,27 @@
+## [1.3.1] - 32/06/2021
+
+Fixed:
+- Extensions were not being exported and could not be used.
+
+New:
+- Added a `styx` extension for any `Rx<T>` type for ease of use for reactive widgets.
+```
+class Person {
+  Person({String title = ''}) {
+    this.title(title);
+  }
+
+  final title = ''.obs;
+}
+
+final person = Person(title: "Name");
+
+/// Then inside a widget somewhere.
+person.title.styx((value) {
+  return Text(value);
+})
+```
+
 ## [1.3.0] - 23/06/2021
 
 BREAKING CHANGES:
