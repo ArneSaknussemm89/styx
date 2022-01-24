@@ -1,3 +1,11 @@
+## [2.0.0] - 
+
+BREAKING CHANGES:
+- Replaced dependency on GetX and move to rxdart.
+- EntitySystem now uses a BehvaiorSubject for `entities`.
+- Moved back to using `Entity` directly instead of `Rx<Entity>`.
+- The `.styx` extension has been removed and has been added to the `styx_flutter:>=2.0` package.
+
 ## [1.3.2] - 24/06/2021
 
 Fixed:

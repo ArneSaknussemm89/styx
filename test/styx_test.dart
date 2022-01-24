@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:get/get.dart';
 
 import 'package:styx/styx.dart';
 
@@ -9,18 +8,16 @@ void main() {
   group('Adding Components', () {
     test('can add component', () {
       final system = EntitySystem();
-
-      expect(system.entities.length, 0);
       var entity = system.create();
+
       entity += CountComponent(0);
-      expect(entity.get<CountComponent>().count(), 0);
+      expect(entity.get<CountComponent>().count.value, 0);
     });
 
     test('cannot have same component twice', () {
       final system = EntitySystem();
-
-      expect(system.entities.length, 0);
       var entity = system.create();
+
       entity += CountComponent(0);
       expect(entity.get<CountComponent>().count(), 0);
       entity += CountComponent(1);
@@ -39,7 +36,7 @@ void main() {
       e2 += NameComponent('Entity 2');
 
       final diff = e1.componentDiff(e2);
-      expect(diff, Set.from([CountComponent]));
+      expect(diff, {CountComponent});
     });
 
     test('different entities with same values', () {
@@ -59,10 +56,8 @@ void main() {
     test('matching all', () {
       final system = EntitySystem();
 
-      final cartMatcher =
-          EntityMatcher(all: Set.of([CartComponent, PriceComponent]));
-      final itemMatcher =
-          EntityMatcher(all: Set.of([PriceComponent, CatalogItemComponent]));
+      const cartMatcher = EntityMatcher(all: {CartComponent, PriceComponent});
+      const itemMatcher = EntityMatcher(all: {PriceComponent, CatalogItemComponent});
 
       var e1 = system.create();
       var e2 = system.create();
@@ -91,8 +86,7 @@ void main() {
     test('testing any', () {
       final system = EntitySystem();
 
-      final itemMatcher =
-          EntityMatcher(any: Set.of([PriceComponent, CatalogItemComponent]));
+      const itemMatcher = EntityMatcher(any: {PriceComponent, CatalogItemComponent});
 
       var e1 = system.create();
       var e2 = system.create();
@@ -113,8 +107,7 @@ void main() {
     test('testing any inverse', () {
       final system = EntitySystem();
 
-      final itemMatcher = EntityMatcher(
-          any: Set.of([PriceComponent, CatalogItemComponent]), reverse: true);
+      const itemMatcher = EntityMatcher(any: {PriceComponent, CatalogItemComponent}, reverse: true);
 
       var e1 = system.create();
       var e2 = system.create();
@@ -135,8 +128,7 @@ void main() {
     test('testing all inverse', () {
       final system = EntitySystem();
 
-      final itemMatcher = EntityMatcher(
-          all: Set.of([PriceComponent, CatalogItemComponent]), reverse: true);
+      const itemMatcher = EntityMatcher(all: {PriceComponent, CatalogItemComponent}, reverse: true);
 
       var e1 = system.create();
       var e2 = system.create();
@@ -155,19 +147,25 @@ void main() {
   });
 
   group('Reactivity', () {
-    test('detect new entities', () {
+    test('detect new entities', () async {
       final system = EntitySystem();
 
-      List<String> guids = [];
-      Worker watcher = ever(system.entities, (List<Rx<Entity>> entities) {
-        guids = entities.map((e) => e().guid).toList();
+      var count = 0;
+
+      final subscription = system.entities.listen((value) {
+        count = value.length;
       });
 
+      // ignore: unused_local_variable
       var e = system.create();
+      await Future.delayed(const Duration(seconds: 1));
+      expect(count, 1);
+      // ignore: unused_local_variable
       var e2 = system.create();
+      await Future.delayed(const Duration(seconds: 1));
+      expect(count, 2);
 
-      expect(guids.length, 2);
-      watcher.dispose();
+      subscription.cancel();
     });
   });
 }

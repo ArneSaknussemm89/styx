@@ -1,4 +1,3 @@
-import 'package:get/get.dart';
 import 'package:styx/styx.dart';
 
 class CountComponent extends Component with SerializableComponent {
@@ -6,12 +5,17 @@ class CountComponent extends Component with SerializableComponent {
     this.count(count);
   }
 
-  final count = RxInt(0);
+  final count = 0.bs;
+
+  @override
+  void onRemoved() {
+    count.close();
+  }
 
   @override
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
-      "count": count(),
+      "count": count.value,
     };
   }
 }
@@ -21,12 +25,17 @@ class NameComponent extends Component with SerializableComponent {
     this.name(name);
   }
 
-  final name = ''.obs;
+  final name = ''.bs;
+
+  @override
+  void onRemoved() {
+    name.close();
+  }
 
   @override
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
-      "name": name(),
+      "name": name.value,
     };
   }
 }
@@ -41,8 +50,14 @@ class CatalogItemComponent extends Component {
 
 class PriceComponent extends Component {
   PriceComponent(double price) {
+    // Add the value.
     this.price(price);
   }
 
-  final price = 0.00.obs;
+  final price = 0.00.bs;
+
+  @override
+  void onRemoved() {
+    price.close();
+  }
 }

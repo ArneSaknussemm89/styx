@@ -1,135 +1,8 @@
 import 'package:equatable/equatable.dart';
-import 'package:get/get.dart';
 
 import 'component.dart';
+import 'extensions/extensions.dart';
 import 'system.dart';
-
-extension RxImplEntity on Rx<Entity> {
-  RxMap<Type, Component> get components => value.components;
-
-  /// Returns a matching component from type T.
-  T get<T extends Component>() {
-    var component = value.components[T];
-    return component as T;
-  }
-
-  /// Adds component to the entity.
-  Rx<Entity> operator +(Component component) {
-    assert(value.isDestroyed.isFalse,
-        'Tried adding component to destroyed entity: ${toJson()}');
-    update((val) {
-      val!.components[component.runtimeType] = component..ref = val;
-    });
-    return this;
-  }
-
-  /// For cascade
-  void set(Component component) {
-    var _ = this + component;
-  }
-
-  /// Removes component from the entity.
-  Rx<Entity> operator -(Type t) {
-    assert(value.isDestroyed.isFalse,
-        'Tried removing component from destroyed entity: ${toJson()}');
-    var component = value.components[t];
-    if (component != null) {
-      update((val) {
-        val!.components.remove(t);
-      });
-    }
-
-    return this;
-  }
-
-  /// For cascade
-  void remove<T extends Component>() {
-    var _ = this - T;
-  }
-
-  /// If entity has a component of type T
-  bool has<T extends Component>() {
-    return value.components.containsKey(T);
-  }
-
-  bool hasComponent(Type type) {
-    return value.components.containsKey(type);
-  }
-
-  /// Compares the component list between entities and returns a list of
-  /// types of components that "a" has that "b" does not.
-  ///
-  /// E.g.
-  ///
-  /// final compared = a.componentDiff(b);
-  Set<Type> componentDiff(Rx<Entity> e) {
-    return value.componentDiff(e);
-  }
-}
-
-extension RxnImplEntity on Rxn<Entity> {
-  RxMap<Type, Component>? get components =>
-      value != null ? value!.components : null;
-
-  /// Returns a matching component from type T.
-  T? get<T extends Component>() {
-    var component = value?.components[T];
-    return component as T;
-  }
-
-  /// Adds component to the entity.
-  Entity? operator +(Component component) {
-    if (value == null) return null;
-    assert(
-      value!.isDestroyed.isFalse,
-      'Tried adding component to destroyed entity: ${toJson()}',
-    );
-    value!.components[component.runtimeType] = component..ref = value!;
-    return value!;
-  }
-
-  /// For cascade
-  void set(Component component) {
-    var _ = this + component;
-  }
-
-  /// Removes component from the entity.
-  Entity? operator -(Type t) {
-    if (value == null) return null;
-    assert(
-      value!.isDestroyed.isFalse,
-      'Tried removing component from destroyed entity: ${toJson()}',
-    );
-    var component = value!.components[t];
-    if (component != null) {
-      value!.components.remove(t);
-    }
-
-    return value;
-  }
-
-  /// For cascade
-  void remove<T extends Component>() {
-    var _ = this - T;
-  }
-
-  /// If entity has a component of type T
-  bool? has<T extends Component>() {
-    if (value == null) return null;
-    return value!.components.containsKey(T);
-  }
-
-  /// Compares the component list between entities and returns a list of
-  /// types of components that "a" has that "b" does not.
-  ///
-  /// E.g.
-  ///
-  /// final compared = a.componentDiff(b);
-  Set<Type>? componentDiff(Rx<Entity> e) {
-    if (value == null) return null;
-    return value!.componentDiff(e);
-  }
-}
 
 /// A container that holds components essentially.
 class Entity with EquatableMixin {
@@ -141,23 +14,27 @@ class Entity with EquatableMixin {
   final EntitySystem system;
 
   // Holding all components map through their type.
-  final components = <Type, Component>{}.obs;
+  final components = <Type, Component>{}.bs;
 
   /// Used internally for verifying Entity has not been destroyed before
   /// mutating any values.
-  final isDestroyed = false.obs;
+  final isDestroyed = false.bs;
 
   /// Returns a matching component from type T.
   T get<T extends Component>() {
-    var component = components[T];
+    var component = components()[T];
     return component as T;
   }
 
   /// Adds component to the entity.
   Entity operator +(Component component) {
-    assert(isDestroyed.isFalse,
-        'Tried adding component to destroyed entity: ${toJson()}');
-    components[component.runtimeType] = component..ref = this;
+    assert(!isDestroyed(), 'Tried adding component to destroyed entity: ${toJson()}');
+    final copy = Map<Type, Component>.from(components());
+    // Create new list and then add.
+    copy[component.runtimeType] = component..ref = this;
+    components(copy);
+    // Call onAdded.
+    component.onAdded();
     return this;
   }
 
@@ -168,11 +45,16 @@ class Entity with EquatableMixin {
 
   /// Removes component from the entity.
   Entity operator -(Type t) {
-    assert(isDestroyed.isFalse,
-        'Tried removing component from destroyed entity: ${toJson()}');
-    var component = components[t];
+    assert(isDestroyed(), 'Tried removing component from destroyed entity: ${toJson()}');
+    var component = components()[t];
     if (component != null) {
-      components.remove(t);
+      // Call onRemoved.
+      component.onRemoved();
+      final copy = Map<Type, Component>.from(components());
+      // Created copy and removed this component.
+      copy.remove(t);
+      // Set value of the subject.
+      components.add(copy);
     }
 
     return this;
@@ -185,7 +67,12 @@ class Entity with EquatableMixin {
 
   /// If entity has a component of type T
   bool has<T extends Component>() {
-    return components.containsKey(T);
+    return components().containsKey(T);
+  }
+
+  /// Checks if entity has a component of the type of the given object.
+  bool hasComponent(Type type) {
+    return components().containsKey(type);
   }
 
   /// Destroy an entity which will lead to following steps:
@@ -193,11 +80,13 @@ class Entity with EquatableMixin {
   /// 2. Remove from the system
   /// 3. Set `isDestroyed` to `true`
   void destroy() {
-    for (var comp in components.values.toList()) {
+    for (var comp in components().values.toList()) {
       var _ = this - comp.runtimeType;
     }
     system.destroyed(this);
-    isDestroyed.value = true;
+    // Add to sink that we are destroyed.
+    isDestroyed(true);
+    isDestroyed.close();
   }
 
   /// Compares the component list between entities and returns a list of
@@ -206,16 +95,16 @@ class Entity with EquatableMixin {
   /// E.g.
   ///
   /// final compared = a.componentDiff(b);
-  Set<Type> componentDiff(Rx<Entity> e) {
-    final ecomps = e.components.keys.toSet();
-    return components.keys.toSet().difference(ecomps);
+  Set<Type> componentDiff(Entity e) {
+    final ecomps = e.components().keys.toSet();
+    return components().keys.toSet().difference(ecomps);
   }
 
   Map<String, dynamic> toJson() {
     return system.entityToJson(this);
   }
 
-  static Rx<Entity> fromJson(Map<String, dynamic> json, EntitySystem system) {
+  static Entity fromJson(Map<String, dynamic> json, EntitySystem system) {
     return system.createFromJson(json);
   }
 
@@ -244,9 +133,7 @@ class Entity with EquatableMixin {
 /// var matcher = EntityMatcher(any: [DiscontinuedComponent, OutOfStockComponent, DisabledComponent], reverse: true)
 /// This matcher would match any entity that DOES NOT have any one of these components.
 class EntityMatcher extends Equatable {
-  EntityMatcher({Set<Type>? all, Set<Type>? any, this.reverse = false})
-      : all = all ?? Set.of([]),
-        any = any ?? Set.of([]);
+  const EntityMatcher({this.all = const {}, this.any = const {}, this.reverse = false});
 
   final Set<Type> all;
   final Set<Type> any;
@@ -256,7 +143,7 @@ class EntityMatcher extends Equatable {
     return all.contains(type) || any.contains(type);
   }
 
-  bool matches(Rx<Entity> entity) {
+  bool matches(Entity entity) {
     if (any.isEmpty && all.isEmpty) {
       return true;
     }
@@ -267,19 +154,19 @@ class EntityMatcher extends Equatable {
     return anyMatched && allMatched;
   }
 
-  bool matchesAll(Rx<Entity> entity) {
+  bool matchesAll(Entity entity) {
     if (all.isEmpty) return true;
     // If reverse, we want to make sure we contain NONE of the components
     // in all.
     if (reverse) {
-      for (var t in all) {
+      for (final t in all) {
         if (entity.hasComponent(t)) {
           return false;
         }
       }
     } else {
-      for (var t in all) {
-        if (entity.hasComponent(t) == false) {
+      for (final t in all) {
+        if (!entity.hasComponent(t)) {
           return false;
         }
       }
@@ -288,7 +175,7 @@ class EntityMatcher extends Equatable {
     return true;
   }
 
-  bool matchesAny(Rx<Entity> entity) {
+  bool matchesAny(Entity entity) {
     if (any.isEmpty) return true;
     // If reversed, we match if it doesn't contain any of the any components
     if (reverse) {

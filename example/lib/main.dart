@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:styx/styx.dart';
 
 final system = EntitySystem();
 
 void main() {
+  // ignore: unused_local_variable
   var entity = system.create();
   entity += Counter(0);
   entity += Name('Flutter');
-  runApp(Entry());
+  runApp(const Entry());
 }
 
 class Entry extends StatelessWidget {
+  const Entry({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Home(),
     );
@@ -22,42 +24,83 @@ class Entry extends StatelessWidget {
 }
 
 class Home extends StatelessWidget {
+  const Home({Key? key}) : super(key: key);
+
+  final EntityMatcher counterMatcher = const EntityMatcher(any: {Counter});
+  final EntityMatcher personMatcher = const EntityMatcher(any: {Name});
+
   @override
   Widget build(BuildContext context) {
-    final counter =
-        system.entities.where((e) => e.has<Counter>()).toList().first;
-    final person = system.entities.where((e) => e.has<Name>()).toList().first;
     return Scaffold(
-      appBar: AppBar(title: Text('Counter Example')),
+      appBar: AppBar(title: const Text('Counter Example')),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Obx(() {
-            return Center(
-              child: Text(
-                counter.get<Counter>().value().toString(),
-                style: TextStyle(fontSize: 30),
-              ),
-            );
-          }),
-          Obx(() {
-            return Center(
-              child: Text(person.get<Name>().value(),
-                  style: TextStyle(fontSize: 24)),
-            );
-          }).paddingOnly(top: 20),
-          TextFormField(
-            initialValue: person.get<Name>().value(),
-            onChanged: (value) => person.get<Name>().value(value),
-            decoration: InputDecoration(
-              labelText: 'Name',
-            ),
-          )
+          StreamBuilder<List<Entity>>(
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                final counter = snapshot.data!.firstWhere(counterMatcher.matches);
+                return StreamBuilder<int>(
+                  stream: counter.get<Counter>().value.stream,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return Text('Counter: ${counter.get<Counter>().value()}');
+                    } else {
+                      return const Text('Loading...');
+                    }
+                  },
+                );
+              }
+
+              return const SizedBox.shrink();
+            },
+            stream: system.entities.stream,
+          ),
+          StreamBuilder<List<Entity>>(
+            stream: system.entities.stream,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                final person = snapshot.data!.firstWhere(personMatcher.matches);
+                final counter = snapshot.data!.firstWhere(counterMatcher.matches);
+                return Column(
+                  children: [
+                    StreamBuilder(
+                      stream: counter.get<Counter>().value.stream,
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          return Text('Counter: ${counter.get<Counter>().value()}');
+                        } else {
+                          return const Text('Loading...');
+                        }
+                      },
+                    ),
+                    TextFormField(
+                      initialValue: person.get<Name>().value(),
+                      onChanged: (value) => person.get<Name>().value(value),
+                      decoration: const InputDecoration(
+                        labelText: 'Name',
+                      ),
+                    ),
+                  ],
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: counter.get<Counter>().increment,
-        child: Icon(Icons.add),
+      floatingActionButton: StreamBuilder<List<Entity>>(
+        stream: system.entities.stream,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            final counter = snapshot.data!.firstWhere(counterMatcher.matches);
+            return FloatingActionButton(
+              onPressed: counter.get<Counter>().increment,
+              child: const Icon(Icons.add),
+            );
+          }
+          return const SizedBox.shrink();
+        },
       ),
     );
   }
@@ -65,10 +108,15 @@ class Home extends StatelessWidget {
 
 class Counter extends Component {
   Counter(int initial) {
-    this.value(initial);
+    value(initial);
   }
 
-  final value = 0.obs;
+  final value = 0.bs;
+
+  @override
+  void onRemoved() {
+    value.close();
+  }
 
   void increment() {
     value(value() + 1);
@@ -81,8 +129,13 @@ class Counter extends Component {
 
 class Name extends Component {
   Name(String initial) {
-    this.value(initial);
+    value(initial);
   }
 
-  final value = ''.obs;
+  final value = ''.bs;
+
+  @override
+  void onRemoved() {
+    value.close();
+  }
 }
