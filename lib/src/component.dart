@@ -16,5 +16,6 @@ abstract class Component {
   // Called when the component is removed.
   void onRemoved() {}
 
-  factory Component.fromJson(Map<String, dynamic> json) => throw UnimplementedError();
+  factory Component.fromJson(Map<String, dynamic> json) =>
+      throw UnimplementedError();
 }
