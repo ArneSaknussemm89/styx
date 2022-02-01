@@ -1,4 +1,7 @@
-## [2.0.0] - 
+## [2.0.1] - 31/01/2022
+- Fixed issue with pub points.
+
+## [2.0.0] - 24/01/2022
 
 BREAKING CHANGES:
 - Replaced dependency on GetX and move to rxdart.
