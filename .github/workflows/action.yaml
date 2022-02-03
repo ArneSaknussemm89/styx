@@ -13,9 +13,10 @@ jobs:
         channel: 'stable'
     - run: flutter packages get
     - run: flutter test --coverage
-    - run: flutter pub run coverage:format_coverage --lcov --in=coverage --out=coverage.lcov --packages=.packages --report-on=lib
     - name: Upload coverage to Codecov  
       uses: codecov/codecov-action@v2
       with:
         token: ${{secrets.CODECOV_TOKEN}}
-        file: coverage.lcov
+        directory: coverage
+        file: lcov.info
+        verbose: true
