@@ -16,6 +16,10 @@ typedef ComponentSerializerFunction = Map<String, dynamic> Function(Serializable
 // A function that takes in an entity and returns JSON-esque data.
 typedef EntityToJsonFunction = Map<String, dynamic> Function(Entity entity);
 
+// A function that takes in an entity and returns T which would be a value
+// that can be used to determine if an entity is unique.
+typedef EntityUniqueKeyGeneratorFunction<T> = T Function(Entity entity);
+
 // A function that takes in JSON and returns an Entity;
 typedef EntityFromJsonFunction = Entity Function(
   Map<String, dynamic> json,
@@ -23,11 +27,13 @@ typedef EntityFromJsonFunction = Entity Function(
 );
 
 /// This system is for keeping track of all created entities.
-class EntitySystem {
+class EntitySystem<T> {
   final uuid = const Uuid();
 
   // The listener that updates the public list of entities.
   late StreamSubscription _listener;
+
+  EntityUniqueKeyGeneratorFunction<T>? uniqueKeyGeneratorFunction;
 
   EntitySystem() {
     // When entities updates, map over and update the public entity list.
@@ -37,20 +43,13 @@ class EntitySystem {
     });
   }
 
-  /// Call this to release resources and workers.
-  void dispose() {
-    /// Clear entities and cancel subscription.
-    _listener.cancel();
-    _entities.close();
-    entities.close();
-  }
-
-  /// Remove all entities.
-  void flush() {
-    if (_entities.hasValue) {
-      _entities.value.forEach((guid, e) => e.destroy());
-      _entities.value.clear();
-    }
+  // Generate a system with a custom unique key generator function.
+  static EntitySystem<T> withUniqueKeyGenerator<T>(
+    EntityUniqueKeyGeneratorFunction<T> uniqueKeyGeneratorFunction,
+  ) {
+    final system = EntitySystem<T>();
+    system.uniqueKeyGeneratorFunction = uniqueKeyGeneratorFunction;
+    return system;
   }
 
   /// A list of registered deserializer functions.
@@ -70,10 +69,26 @@ class EntitySystem {
   EntityFromJsonFunction entityFromJsonFunction = defaultEntityFromJsonFunction;
 
   /// The internal registry of all created entities.
-  final _entities = <String, Entity>{}.bs;
+  final _entities = <T, Entity>{}.bs;
 
   /// An observable list of entities.
   final entities = <Entity>[].bs;
+
+  /// Call this to release resources and workers.
+  void dispose() {
+    /// Clear entities and cancel subscription.
+    _listener.cancel();
+    _entities.close();
+    entities.close();
+  }
+
+  /// Remove all entities.
+  void flush() {
+    if (_entities.hasValue) {
+      _entities.value.forEach((guid, e) => e.destroy());
+      _entities.value.clear();
+    }
+  }
 
   /// Register a deserializer function.
   void registerDeserializer(ComponentDeserializerFunction deserializer) {
@@ -101,9 +116,19 @@ class EntitySystem {
     return setEntity(entity);
   }
 
+  /// This function actually sets the entity in the list.
+  /// Left public so that if you want to use your own method for creating entities
+  /// you can, as long as you call this method so the system tracks the entity.
   Entity setEntity(Entity entity) {
     final current = _entities.value;
-    final newList = Map.fromIterables([...current.keys, entity.guid], [...current.values, entity]);
+    // If we have a custom key generator use that.
+    late final T key;
+    if (uniqueKeyGeneratorFunction != null) {
+      key = uniqueKeyGeneratorFunction!(entity);
+    } else {
+      key = entity.guid as T;
+    }
+    final newList = Map.fromIterables([...current.keys, key], [...current.values, entity]);
     _entities.add(newList);
     // Return the entity.
     return _entities.value[entity.guid]!;
@@ -128,7 +153,7 @@ class EntitySystem {
 /// Standard serializer that turns an entity into JSON.
 Map<String, dynamic> defaultEntityToJsonFunction(Entity entity) {
   List<Map<String, dynamic>> componentData = [];
-  entity.components().forEach(
+  entity.components.value.forEach(
     (type, component) {
       if (component is SerializableComponent) {
         componentData.add({'type': type.toString(), 'data': (component as SerializableComponent).toJson()});

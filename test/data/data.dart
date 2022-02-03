@@ -2,7 +2,7 @@ import 'package:styx/styx.dart';
 
 class CountComponent extends Component with SerializableComponent {
   CountComponent(int count) {
-    this.count(count);
+    this.count.add(count);
   }
 
   final count = 0.bs;
@@ -22,7 +22,7 @@ class CountComponent extends Component with SerializableComponent {
 
 class NameComponent extends Component with SerializableComponent {
   NameComponent(String name) {
-    this.name(name);
+    this.name.add(name);
   }
 
   final name = ''.bs;
@@ -51,7 +51,7 @@ class CatalogItemComponent extends Component {
 class PriceComponent extends Component {
   PriceComponent(double price) {
     // Add the value.
-    this.price(price);
+    this.price.add(price);
   }
 
   final price = 0.00.bs;

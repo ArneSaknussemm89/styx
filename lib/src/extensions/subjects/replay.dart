@@ -1,6 +1,7 @@
 part of extensions;
 
 extension ReplaySubjectAddValue<T> on ReplaySubject<T> {
+  @Deprecated('Use .values instead. This was kept for backwards compatibility. Will be removed in 3.0.0')
   List<T> call([T? v]) {
     if (v != null) {
       add(v);
@@ -11,6 +12,7 @@ extension ReplaySubjectAddValue<T> on ReplaySubject<T> {
 }
 
 extension ReplaySubjectAddNullableValue<T> on ReplaySubject<T?> {
+  @Deprecated('Use .values instead. This was kept for backwards compatibility. Will be removed in 3.0.0')
   List<T?> call([T? v]) {
     add(v);
     return values;

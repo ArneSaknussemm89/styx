@@ -7,7 +7,7 @@ import 'data/data.dart';
 void main() {
   group('Adding Components', () {
     test('can add component', () {
-      final system = EntitySystem();
+      final system = EntitySystem<String>();
       var entity = system.create();
 
       entity += CountComponent(0);
@@ -15,13 +15,13 @@ void main() {
     });
 
     test('cannot have same component twice', () {
-      final system = EntitySystem();
+      final system = EntitySystem<String>();
       var entity = system.create();
 
       entity += CountComponent(0);
-      expect(entity.get<CountComponent>().count(), 0);
+      expect(entity.get<CountComponent>().count.value, 0);
       entity += CountComponent(1);
-      expect(entity.get<CountComponent>().count(), 1);
+      expect(entity.get<CountComponent>().count.value, 1);
     });
   });
 
