@@ -1,6 +1,7 @@
 part of extensions;
 
 extension BehaviorSubjectAddValue<T> on BehaviorSubject<T> {
+  @Deprecated('Use .value instead. This was kept for backwards compatibility. Will be removed in 3.0.0')
   T call([T? v]) {
     if (v != null) {
       add(v);
@@ -11,6 +12,7 @@ extension BehaviorSubjectAddValue<T> on BehaviorSubject<T> {
 }
 
 extension BehaviorSubjectAddNullableValue<T> on BehaviorSubject<T?> {
+  @Deprecated('Use .value instead. This was kept for backwards compatibility. Will be removed in 3.0.0')
   T? call([T? v]) {
     add(v);
     return value;

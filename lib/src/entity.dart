@@ -22,18 +22,17 @@ class Entity with EquatableMixin {
 
   /// Returns a matching component from type T.
   T get<T extends Component>() {
-    var component = components()[T];
+    var component = components.value[T];
     return component as T;
   }
 
   /// Adds component to the entity.
   Entity operator +(Component component) {
-    assert(!isDestroyed(),
-        'Tried adding component to destroyed entity: ${toJson()}');
-    final copy = Map<Type, Component>.from(components());
+    assert(!isDestroyed.value, 'Tried adding component to destroyed entity: ${toJson()}');
+    final copy = Map<Type, Component>.from(components.value);
     // Create new list and then add.
     copy[component.runtimeType] = component..ref = this;
-    components(copy);
+    components.add(copy);
     // Call onAdded.
     component.onAdded();
     return this;
@@ -46,13 +45,12 @@ class Entity with EquatableMixin {
 
   /// Removes component from the entity.
   Entity operator -(Type t) {
-    assert(isDestroyed(),
-        'Tried removing component from destroyed entity: ${toJson()}');
-    var component = components()[t];
+    assert(isDestroyed.value, 'Tried removing component from destroyed entity: ${toJson()}');
+    var component = components.value[t];
     if (component != null) {
       // Call onRemoved.
       component.onRemoved();
-      final copy = Map<Type, Component>.from(components());
+      final copy = Map<Type, Component>.from(components.value);
       // Created copy and removed this component.
       copy.remove(t);
       // Set value of the subject.
@@ -69,12 +67,12 @@ class Entity with EquatableMixin {
 
   /// If entity has a component of type T
   bool has<T extends Component>() {
-    return components().containsKey(T);
+    return components.value.containsKey(T);
   }
 
   /// Checks if entity has a component of the type of the given object.
   bool hasComponent(Type type) {
-    return components().containsKey(type);
+    return components.value.containsKey(type);
   }
 
   /// Destroy an entity which will lead to following steps:
@@ -82,12 +80,12 @@ class Entity with EquatableMixin {
   /// 2. Remove from the system
   /// 3. Set `isDestroyed` to `true`
   void destroy() {
-    for (var comp in components().values.toList()) {
+    for (var comp in components.value.values.toList()) {
       var _ = this - comp.runtimeType;
     }
     system.destroyed(this);
     // Add to sink that we are destroyed.
-    isDestroyed(true);
+    isDestroyed.add(true);
     isDestroyed.close();
   }
 
@@ -98,8 +96,8 @@ class Entity with EquatableMixin {
   ///
   /// final compared = a.componentDiff(b);
   Set<Type> componentDiff(Entity e) {
-    final ecomps = e.components().keys.toSet();
-    return components().keys.toSet().difference(ecomps);
+    final ecomps = e.components.value.keys.toSet();
+    return components.value.keys.toSet().difference(ecomps);
   }
 
   Map<String, dynamic> toJson() {
@@ -135,8 +133,11 @@ class Entity with EquatableMixin {
 /// var matcher = EntityMatcher(any: [DiscontinuedComponent, OutOfStockComponent, DisabledComponent], reverse: true)
 /// This matcher would match any entity that DOES NOT have any one of these components.
 class EntityMatcher extends Equatable {
-  const EntityMatcher(
-      {this.all = const {}, this.any = const {}, this.reverse = false});
+  const EntityMatcher({
+    this.all = const {},
+    this.any = const {},
+    this.reverse = false,
+  });
 
   final Set<Type> all;
   final Set<Type> any;

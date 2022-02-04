@@ -1,6 +1,7 @@
 part of extensions;
 
 extension PublishSubjectAddValue<T> on PublishSubject<T> {
+  @Deprecated('Use .add instead. This was kept for backwards compatibility. Will be removed in 3.0.0')
   Stream<T> call([T? v]) {
     if (v != null) {
       add(v);
@@ -11,6 +12,7 @@ extension PublishSubjectAddValue<T> on PublishSubject<T> {
 }
 
 extension PublishSubjectAddNullableValue<T> on PublishSubject<T?> {
+  @Deprecated('Use .add instead. This was kept for backwards compatibility. Will be removed in 3.0.0')
   Stream<T?> call([T? v]) {
     add(v);
     return stream;

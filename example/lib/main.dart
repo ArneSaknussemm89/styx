@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:styx/styx.dart';
 
-final system = EntitySystem();
+final system = EntitySystem<String>();
 
 void main() {
   // ignore: unused_local_variable
@@ -44,7 +44,7 @@ class Home extends StatelessWidget {
                   stream: counter.get<Counter>().value.stream,
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
-                      return Text('Counter: ${counter.get<Counter>().value()}');
+                      return Text('Counter: ${counter.get<Counter>().getValue()}');
                     } else {
                       return const Text('Loading...');
                     }
@@ -68,15 +68,15 @@ class Home extends StatelessWidget {
                       stream: counter.get<Counter>().value.stream,
                       builder: (context, snapshot) {
                         if (snapshot.hasData) {
-                          return Text('Counter: ${counter.get<Counter>().value()}');
+                          return Text('Counter: ${counter.get<Counter>().getValue()}');
                         } else {
                           return const Text('Loading...');
                         }
                       },
                     ),
                     TextFormField(
-                      initialValue: person.get<Name>().value(),
-                      onChanged: (value) => person.get<Name>().value(value),
+                      initialValue: person.get<Name>().getValue(),
+                      onChanged: (value) => person.get<Name>().setValue(value),
                       decoration: const InputDecoration(
                         labelText: 'Name',
                       ),
@@ -108,7 +108,7 @@ class Home extends StatelessWidget {
 
 class Counter extends Component {
   Counter(int initial) {
-    value(initial);
+    value.add(initial);
   }
 
   final value = 0.bs;
@@ -119,17 +119,21 @@ class Counter extends Component {
   }
 
   void increment() {
-    value(value() + 1);
+    value.add(getValue() + 1);
   }
 
   void decrement() {
-    value(value() - 1);
+    value.add(getValue() - 1);
+  }
+
+  int getValue() {
+    return value.value;
   }
 }
 
 class Name extends Component {
   Name(String initial) {
-    value(initial);
+    value.add(initial);
   }
 
   final value = ''.bs;
@@ -137,5 +141,13 @@ class Name extends Component {
   @override
   void onRemoved() {
     value.close();
+  }
+
+  void setValue(String name) {
+    value.add(name);
+  }
+
+  String getValue() {
+    return value.value;
   }
 }

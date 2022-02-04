@@ -75,16 +75,16 @@ class Counter extends Component {
   }
 
   void increment() {
-    count(count() + 1);
+    count.add(count.value + 1);
   }
 
   void decrement() {
-    count(count() - 1);
+    count.add(count.value - 1);
   }
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
-      "count": count(),
+      "count": count.value,
     };
   }
 }
