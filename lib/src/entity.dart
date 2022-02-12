@@ -199,6 +199,11 @@ class EntityMatcher extends Equatable {
     return false;
   }
 
+  // Returns a list of matched entities.
+  List<Entity> match(EntitySystem system) {
+    return system.entities.value.where((element) => matches(element)).toList();
+  }
+
   @override
   List<Object?> get props => [all, any, reverse];
 }
