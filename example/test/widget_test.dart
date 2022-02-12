@@ -14,6 +14,7 @@ void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const Entry());
+    await tester.pump(const Duration(milliseconds: 300));
 
     // Verify that our counter starts at 0.
     expect(find.text('Counter: 0'), findsOneWidget);
@@ -21,7 +22,7 @@ void main() {
 
     // Tap the '+' icon and trigger a frame.
     await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    await tester.pumpAndSettle(const Duration(milliseconds: 300));
 
     // Verify that our counter has incremented.
     expect(find.text('Counter: 0'), findsNothing);

@@ -1,8 +1,12 @@
+// ignore_for_file: unused_local_variable
+
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:styx/styx.dart';
 
 import 'data/data.dart';
+
+Future<void> delay() => Future.delayed(const Duration(milliseconds: 300));
 
 void main() {
   group('Adding Components', () {
@@ -144,6 +148,33 @@ void main() {
       expect(itemMatcher.matches(e2), false);
       expect(itemMatcher.matches(e3), true);
     });
+
+    test('testing match function', () async {
+      final system = EntitySystem();
+
+      const itemMatcher = EntityMatcher(all: {PriceComponent, CatalogItemComponent});
+
+      var e1 = system.create();
+      var e2 = system.create();
+      var e3 = system.create();
+
+      e1 += CatalogItemComponent();
+      e1 += PriceComponent(5.00);
+
+      e2 += NameComponent('Test');
+
+      e3 += PriceComponent(1.00);
+
+      // Wait for streams to emit new values.
+      await delay();
+      expect(itemMatcher.match(system).length, 1);
+
+      e3 += CatalogItemComponent();
+
+      // Wait for streams to emit new values.
+      await delay();
+      expect(itemMatcher.match(system).length, 2);
+    });
   });
 
   group('Reactivity', () {
@@ -156,13 +187,12 @@ void main() {
         count = value.length;
       });
 
-      // ignore: unused_local_variable
       var e = system.create();
-      await Future.delayed(const Duration(seconds: 1));
+      await delay();
       expect(count, 1);
-      // ignore: unused_local_variable
+      
       var e2 = system.create();
-      await Future.delayed(const Duration(seconds: 1));
+      await delay();
       expect(count, 2);
 
       subscription.cancel();
