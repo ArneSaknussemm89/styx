@@ -1,10 +1,10 @@
 name: styx
 description: An implementation of the ECS paradigm with an emphasis on simplicity.
-version: 2.1.0
+version: 2.2.0
 repository: https://github.com/ArneSaknussemm89/styx
 
 environment:
-  sdk: ">=2.14.0 <3.0.0"
+  sdk: ">=2.15.0 <3.0.0"
   flutter: ">=2.0.0"
 
 dependencies:

@@ -1,3 +1,8 @@
+## [2.2.0] - 12/02/2022
+**CHANGES:**
+- Added a new `match` method to an EntityMatcher where you pass it an `EntitySystem` and it will return the list of filtered entities.
+Useful when a synchronous read of the matcher is required.
+
 ## [2.1.0] - 04/02/2022
 **BREAKING CHANGES:**
 - Typing `EntitySystem` to allow for a custom entity key generator. Allows systems to uniquely identify Entities their own way if desired.

@@ -11,7 +11,7 @@ Add Styx to your pubspec.yaml file:
 
 ```yaml
 dependencies:
-  styx: ^2.0.0
+  styx: ^2.2.0
 ```
 
 Import Styx in files that it will be used:
