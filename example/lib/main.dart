@@ -37,24 +37,29 @@ class Home extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           StreamBuilder<List<Entity>>(
+            stream: system.entities.stream,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
-                final counter = snapshot.data!.firstWhere(counterMatcher.matches);
-                return StreamBuilder<int>(
-                  stream: counter.get<Counter>().value.stream,
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      return Text('Counter: ${counter.get<Counter>().getValue()}');
-                    } else {
-                      return const Text('Loading...');
-                    }
-                  },
-                );
+                final counters = snapshot.data!.where(counterMatcher.matches).toList();
+                if (counters.isNotEmpty) {
+                  final counter = counters.first;
+                  return StreamBuilder<int>(
+                    stream: counter.get<Counter>().value.stream,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return Text('Counter: ${counter.get<Counter>().getValue()}');
+                      } else {
+                        return const Text('Loading...');
+                      }
+                    },
+                  );
+                }
+
+                return const SizedBox.shrink();
               }
 
               return const SizedBox.shrink();
             },
-            stream: system.entities.stream,
           ),
           StreamBuilder<List<Entity>>(
             stream: system.entities.stream,
